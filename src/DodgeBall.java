@@ -28,14 +28,24 @@ public class DodgeBall extends GraphicsProgram implements ActionListener {
 	public static final int WINDOW_WIDTH = 300;
 	
 	private int numTimes;
+	private GLabel lose;
+	private GLabel destroyed;
+	private int enemiesDestroyed = 0;
+	private GLabel score;
 	
 	public void run() {
 		rgen = RandomGenerator.getInstance();
 		balls = new ArrayList<GOval>();
 		enemies = new ArrayList<GRect>();
 		
+		destroyed = new GLabel("Destroyed: 0", 0, WINDOW_HEIGHT - 20);
+		add(destroyed);
+		
 		text = new GLabel(""+enemies.size(), 0, WINDOW_HEIGHT);
 		add(text);
+		
+		score = new GLabel("Time: 0", 150, WINDOW_HEIGHT - 20);
+		add(score);
 		
 		movement = new Timer(MS, this);
 		movement.start();
@@ -50,6 +60,24 @@ public class DodgeBall extends GraphicsProgram implements ActionListener {
 		
 		if (numTimes % 40 == 0 && enemies.size() < MAX_ENEMIES) {
 			addAnEnemy();
+		}
+		else if (numTimes % 40 == 0 && enemies.size() >= MAX_ENEMIES) {
+			movement.stop();
+			removeAll();
+			
+			lose = new GLabel("You lose!", WINDOW_WIDTH / 2, WINDOW_HEIGHT / 2);
+			lose.setColor(Color.red);
+			lose.setFont("Arial-bold-30");
+			lose.setLocation((WINDOW_WIDTH/2) - lose.getWidth()/2, WINDOW_HEIGHT / 2);
+			add(lose);
+			
+			score.setLabel("Survival time: " + numTimes + " ticks");
+		    score.setFont("Arial-Bold-20");
+		    score.setColor(Color.BLACK);
+		    score.setLocation((WINDOW_WIDTH - score.getWidth()) / 2, WINDOW_HEIGHT / 2 + 30);
+		    add(score);
+		    
+		    return;
 		}
 		
 		numTimes++;
@@ -120,9 +148,11 @@ public class DodgeBall extends GraphicsProgram implements ActionListener {
 	            GRect enemy = (GRect) hit;
 	            remove(enemy);
 	            toRemove.add(enemy);
+	            enemiesDestroyed++;
+	            destroyed.setLabel("Destroyed: " + enemiesDestroyed);
 	        }
 	    }
-
+	    
 	    enemies.removeAll(toRemove);
 	    text.setLabel("Enemies: " + enemies.size());
 	}
